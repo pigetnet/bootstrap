@@ -39,3 +39,11 @@ PATH=/opt/piget/core/string:$PATH
 modifyBashStartup core
 PiTimeZone
 description "PIGET WAS SUCCESFULLY INSTALLED"
+statusBar "PIGET INSTALLED - Type sudo bash to activate it"
+
+if [ -f /boot/bootstrap/projects/postinstall.sh ]
+then
+	description "POST INSTALL SCRIPT FOUNDED"
+	chmod +x /boot/bootstrap/projects/postinstall.sh
+	/boot/bootstrap/projects/postinstall.sh
+fi
