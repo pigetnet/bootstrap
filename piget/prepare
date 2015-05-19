@@ -4,7 +4,7 @@ echo " "
 
 if [ $(id -u) -ne 0 ]; then
         echo "ERROR  : Script must be run as root."
-	echo "ACTION : sudo /boot/bootstrap/piget "
+        echo "ACTION : sudo /boot/bootstrap/piget "
         exit 1
 fi
 
@@ -13,14 +13,20 @@ ping -c1 www.google.com && internet=1 || internet=0
 
 if [[ $internet == 0 ]]
 then
-	echo "ERROR : You must be connected to internet to bootstrap your Raspberry Pi"
-	exit 1
+        echo "ERROR : You must be connected to internet to bootstrap your Raspberry Pi"
+        exit 1
 fi
 
 echo "--> Installing piget framework"
 
 #Generating piget directory
 mkdir /opt/piget
+mkdir /opt/user
+
+#User data directory
+mkdir /opt/user/scripts
+mkdir /opt/user/config
+mkdir /opt/user/data
 
 #We remove core functions if previously installed
 rm -rf /opt/piget/core
@@ -41,9 +47,10 @@ PiTimeZone
 description "PIGET WAS SUCCESFULLY INSTALLED"
 nlbecho "Type";nlbecho "sudo bash " $ERR;nlbecho "to activate it!"
 
-if [ -f /boot/bootstrap/projects/postinstall.sh ]
+if [ -f /boot/piget/projects/postinstall.sh ]
 then
-	description "POST INSTALL SCRIPT FOUNDED"
-	chmod +x /boot/bootstrap/projects/postinstall.sh
-	/boot/bootstrap/projects/postinstall.sh
+        description "POST INSTALL SCRIPT FOUNDED"
+        chmod +x /boot/piget/projects/postinstall.sh
+        /boot/piget/projects/postinstall.sh
 fi
+

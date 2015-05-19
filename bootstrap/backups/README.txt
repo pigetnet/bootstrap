@@ -1,1 +1,0 @@
-All backups configuration are saved here
