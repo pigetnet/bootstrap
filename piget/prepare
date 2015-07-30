@@ -1,5 +1,5 @@
 #!/bin/bash
-echo " -------------------- PIGET BOOTSTRAPER --------------------- "
+echo " -------------------- PIGET INSTALL --------------------- "
 echo " "
 
 if [ $(id -u) -ne 0 ]; then
@@ -34,23 +34,25 @@ rm -rf /opt/piget/core
 #Cloning core scripts repository
 git clone https://github.com/pigetnet/core /opt/piget/core
 
-#Export path to use core scripts
-PATH=/opt/piget/core/graphics:$PATH
-PATH=/opt/piget/core/install:$PATH
-PATH=/opt/piget/core/network:$PATH
-PATH=/opt/piget/core/info:$PATH
-PATH=/opt/piget/core/string:$PATH
+#Create link
+ln -sv /opt/piget/core/net /net
+ln -sv /opt/piget/core/pi /pi
+ln -sv /opt/piget/core/show /show
+ln -sv /opt/piget/core/string /string
+ln -sv /opt/piget/core/system /system
+ln -sv /opt/piget/ /do
+
 
 #Testing PIGET
-modifyBashStartup core
-PiTimeZone
-description "PIGET WAS SUCCESFULLY INSTALLED"
-nlbecho "Type";nlbecho "sudo bash " $ERR;nlbecho "to activate it!"
+/system/modifyBashStartup core
+/pi/timeZone
+/show/description "PIGET WAS SUCCESFULLY INSTALLED"
+/show/nlbecho "Type";/show/nlbecho "sudo bash " $ERR;/show/nlbecho "to activate it!"
 
-if [ -f /boot/piget/projects/postinstall.sh ]
+if [ -f /boot/piget/scripts/postinstall.sh ]
 then
-        description "POST INSTALL SCRIPT FOUNDED"
-        chmod +x /boot/piget/projects/postinstall.sh
-        /boot/piget/projects/postinstall.sh
+        /show/description "POST INSTALL SCRIPT FOUNDED"
+        chmod +x /boot/piget/scripts/postinstall.sh
+        /boot/piget/scripts/postinstall.sh
 fi
 
