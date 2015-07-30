@@ -31,9 +31,11 @@ mkdir /opt/user/data
 #We remove core functions if previously installed
 rm -rf /opt/piget/core
 
+echo "--> Cloning core functionalities"
 #Cloning core scripts repository
 git clone https://github.com/pigetnet/core /opt/piget/core
 
+echo "--> Create links"
 #Create link
 ln -sv /opt/piget/core/net /net
 ln -sv /opt/piget/core/pi /pi
@@ -43,9 +45,14 @@ ln -sv /opt/piget/core/system /system
 ln -sv /opt/piget/ /do
 
 
+echo "--> Update bashrc for root"
 #Testing PIGET
 /system/modifyBashStartup core
 /pi/timeZone
+
+echo "--> Do apt-get update"
+apt-get update
+
 /show/description "PIGET WAS SUCCESFULLY INSTALLED"
 /show/nlbecho "Type";/show/nlbecho "sudo bash " $ERR;/show/nlbecho "to activate it!"
 
