@@ -1,1 +1,27 @@
-prepare
+#!/bin/bash
+echo " -------------------- PIGET INSTALL --------------------- "
+echo " "
+
+if [ $(id -u) -ne 0 ]; then
+	echo "ERROR  : Script must be run as root."
+	echo "ACTION : sudo /boot/bootstrap/piget "
+	exit 1
+fi
+
+echo "--> Checking if your Raspberry Pi is connected to the internet"
+ping -c1 www.google.com && internet=1 || internet=0
+
+if [[ $internet == 0 ]]
+	then
+	echo "ERROR : You must be connected to internet to bootstrap your Raspberry Pi"
+	exit 1
+else
+	echo "Copy install script"
+	wget https://raw.githubusercontent.com/pigetnet/install_SCRIPT/master/install -O /tmp/install
+	if [ $? -eq 0 ];then
+		chmod +x /tmp/install
+		/tmp/install
+	else
+		echo "Error downloading install script"
+	fi
+fi
