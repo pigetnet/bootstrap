@@ -1,17 +1,14 @@
 # ~/.bashrc: executed by bash(1) for non-login shells.
 
+# Custom prompt
+PS1='\[\033[31m\]\h.local\[\033[0m\]:\[\033[01;34m\]\w \$\[\033[00m\] '
+
 # Pretty Terminal
 export LS_OPTIONS='--color=auto'
 eval "`dircolors`"
 alias ls='ls $LS_OPTIONS'
 alias ll='ls $LS_OPTIONS -l'
 alias l='ls $LS_OPTIONS -lA'
-
-################# THIS PART IS REQUIRED FOR PIGET DO NOT ERASE ###############
-echo "-------------------------"
-echo "piget framework activated"
-echo "Type /show/help for more information"
-echo "-------------------------"
 
 #Easy coloring scripts
 export OK="\\033[1;32m"
@@ -23,4 +20,24 @@ export PICOLOR="\\033[1;35m"
 export BLACK="\\033[0;30m"
 export BLUE="\\0034[0;34m"
 export GREEN="\\033[0;32m"
-###################################################################################
+
+# Logo
+echo -ne $OK
+clear
+cat<<EOF
+██████╗ ██╗ ██████╗ ███████╗████████╗
+██╔══██╗██║██╔════╝ ██╔════╝╚══██╔══╝
+██████╔╝██║██║  ███╗█████╗     ██║
+██╔═══╝ ██║██║   ██║██╔══╝     ██║
+██║     ██║╚██████╔╝███████╗   ██║
+╚═╝     ╚═╝ ╚═════╝ ╚══════╝   ╚═╝
+EOF
+
+# Help
+echo -ne $NORMAL
+echo "-------------------------"
+echo -e "Display help:$OK /show/help $NORMAL"
+echo -e "Display help for a command:$OK /show/help $ERR command $NORMAL or $ERR command $NORMAL $OK--help $NORMAL"
+echo "-------------------------"
+
+
