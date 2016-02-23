@@ -12,56 +12,45 @@ export BLACK="\\033[0;30m"
 export BLUE="\\0034[0;34m"
 export GREEN="\\033[0;32m"
 
-isRoot() {
+show-isRoot() {
 #Check if user is root
 if [ $(id -u) -ne 0 ]; then
-	errorBox
+	show-errorBox
 	echo "Script must be run as root."
 	echo "Try 'sudo $0'"
 	echo -ne $NORMAL
-	errorBox
+	show-errorBox
 	echo -ne $NORMAL
 	export PIGETERROR="no root"
 	exit 1
 fi
 }
 
-description() {
+show-description() {
 # Create a description box, Use it to describe your SCRIPT
 echo -ne $WARN
-echo "__________________________________"
-echo "__________________________________"
-echo "$1"
-echo "__________________________________"
-echo "__________________________________"
+echo "---- $1 ----"
 echo -ne $NORMAL
 }
 
-messageBox() {
+show-listecho() {
 #Generate a messagebox
-echo -e $INFO"____________________________________"
-echo $1
-echo -e $INFO"____________________________________"
-echo -e $NORMAL
+# generate a list
+show-nlbecho " ----->" $INFO
+show-colecho "$1" $2
 }
 
-errorBox(){
+show-errorBox(){
 #Display an error box
 echo -ne $ERR
 echo "--- ERROR : $1 ---"
 echo -ne $NORMAL
 }
 
-console() {
-	echo -ne $OK
-	echo "/////////////////////"
-	echo -ne $NORMAL
-}
-
 # Colored echo (without linebreak)
 # usage : colecho text color
 # example : colecho "hello world" $GREEN
-nlbecho(){
+show-nlbecho(){
 	echo -ne $2
 	echo -ne "$1 "
 	echo -ne $NORMAL
@@ -70,7 +59,7 @@ nlbecho(){
 # Colored echo
 # usage : colecho text color
 # example : colecho "hello world" $GREEN
-colecho(){
+show-colecho(){
 	text=$1
 	color=$2
 	echo -ne $color
@@ -78,13 +67,7 @@ colecho(){
 	echo -ne $NORMAL
 }
 
-linebreak(){
-# Generate a line
-echo -e $INFO"____________________________________"
-echo -e $NORMAL
-}
-
-minibox_ERROR(){
+show-minibox_ERROR(){
 	echo -ne " ["
 	echo -ne $ERR
 	echo -ne "ERROR"
@@ -92,7 +75,7 @@ minibox_ERROR(){
 	echo "]"
 }
 
-minibox_OK(){
+show-minibox_OK(){
 	echo -ne " ["
 	echo -ne $OK
 	echo -ne "OK"
@@ -100,7 +83,7 @@ minibox_OK(){
 	echo "]"
 }
 
-minibox_SKIP(){
+show-minibox_SKIP(){
 	echo -ne " ["
 	echo -ne $INFO
 	echo -ne "SKIPPED"
@@ -108,7 +91,7 @@ minibox_SKIP(){
 	echo "]"
 }
 
-minibox_WARNING(){
+show-minibox_WARNING(){
 	echo -ne " ["
 	echo -ne $WARN
 	echo -ne "WARNING"
@@ -116,124 +99,23 @@ minibox_WARNING(){
 	echo "]"
 }
 
-autoBackup(){
-#Automatically backup a file into /boot/piget/backups
-filename=$1
-basename=$(basename $filename)
-timestamp=$(date +%Y%m%d)'_'$(date +%H%M%S)
-
-colecho "THIS WILL OVERWRITE/ERASE $filename !" $ERR
-colecho "(A backup will be made at /boot/piget/backups/$basename.backup.$timestamp)" $WARN
-mkdir -p /boot/config/backups
-cp $filename /boot/config/backups/$basename'.backup.'$timestamp
-}
-
-addAfterLine(){
-#$1 filename
-#$2 addAfterString
-#$3 stringToReplace
-
-if [ $# -eq 3 ];then
-	filename=$1
-	addAfterString=$2
-	stringToReplace=$3
-	echo $filename
-	echo $addAfterString
-	echo $stringToReplace
-	sed -i 's+'"$addAfterString"'+'"$addAfterString"'\n'"$stringToReplace"'+' $filename
-else
-	errorBox "Wrong Arguments"
-	usage "addAfterLine filename addAfterString stringToReplace"
-	example 'addAfterLine "/etc/hosts" "raspberrypi" "192.168.0.254 router"'
-fi
-}
-
-getLine(){
-#$1: File to read
-#$2: String to search
-#return $NewString line number if no line then -1
-
-filename=$1
-stringToSearch=$2
-
-if [ $# -eq 2 ];then
-	line=$(cat $filename |grep -n "$stringToSearch"|awk '{print $1}'| head -n 1)
-	if [ -z $line ];then
- 		nlbecho "Line not founded" $ERR;minibox_WARNING
- 		export NewString=-1
-	else
-		export NewString=$(echo $line|cut -d: -f1)
-		nlbecho "Line founded at $NewString" $OK;minibox_OK
-	fi
-else
- 	errorBox "Wrong arguments"
-	usage "getLine fileToRead StringToSearch"
-	example 'getLine "/etc/rc.local" "# Print"'
-	exit 1
-fi
-}
-
-replaceLine(){
-#You need addAfterLine / getLine
-
-#$1 filename
-#$2 stringToSearch
-#$3 stringToReplace
-#$4 elseAddAfterString
-
-filename="$1"
-stringToSearch="$2"
-stringToReplace="$3"
-elseAddAfterString="$4"
-
-if [ $# -eq 4 ];then
-	#Get Line
-	getLine "$filename" "$stringToSearch"
-	line=$NewString
-	if [ $NewString != -1 ]
-	then
-		nlbecho "Replace Line $stringToSearch at $line with $stringToReplace" $OK;minibox_OK
-		sed -i "${line}s+.*+$stringToReplace+" $filename
-	else
-		nlbecho "Add after line $elseAddAfterString" $WARN;minibox_WARNING
-		addAfterLine "$filename" "$elseAddAfterString" "$stringToReplace"
-	fi
-else
-	errorBox "Wrong Arguments"
-	usage 'replaceLine "Filename" "StringToSearch" "StringToReplace" "ElseAddAfterString"'
-	example 'replaceLine "/etc/hosts" "127.0.0.1" "127.0.0.1 raspberrypi" "ff02::2         ip6-allrouters"'
-fi
-
-}
-
-
-
-
 ########################################################
+# Subroutines
 
-
-# MAIN PROGRAM ############################
-clear
-
-#Verify if you are root
-isRoot
-description "Setup Wifi"
-
-messageBox "Searching for wireless interface"
-console
-interface=$(iwconfig|grep "wlan"|awk '{print $1}')
-console
+#return menu_options with wireless networks for whiptail
+scanNetwork(){
+	interface=$(iwconfig 2>/dev/null | grep -o "^\w*")
 
 if [ "$interface" == "" ]
 	then
-	messageBox "No Wireless Interface founded"
+	show-listecho "No Wifi adapter founded" $ERR
 	exit 1
 else
-	messageBox "Scanning for wireless network"
+	show-listecho "Scanning wireless network" $OK
 	essid=$(iwlist $interface scan|grep "ESSID:"|tr -d '"'|sed -e 's/ESSID://')
 	while [ "$essid" == "" ]
 	do
-		nlbecho "Scan Failed ... Retry ...";minibox_WARNING
+		show-listecho "Scan Failed ... Retry ..." $WARN;
 		essid=$(iwlist $interface scan|grep "ESSID:"|tr -d '"'|sed -e 's/ESSID://')
 		sleep 3
 	done
@@ -244,63 +126,66 @@ else
 			(( i++ ))
 			menu_options[ $i ]=""
 			(( i++ ))
-		done <<<"$essid"
+	done <<<"$essid"
+
 fi
+}
 
-essid_selected=$(whiptail --backtitle "Wifi Configuration" --title "$interface" --menu "Choose your Wireless Network" 0 0 0 "${menu_options[@]}" 3>&1 1>&2 2>&3 )
+#return essid_selected
+displayNetwork(){
+	essid_selected=$(whiptail --backtitle "Wifi Configuration" --title "$interface" --menu "Choose your Wireless Network" 0 0 0 "${menu_options[@]}" 3>&1 1>&2 2>&3 )
+	if [ "$essid_selected" == "" ]
+		then
+		show-listecho "Configuration incomplete" $ERR
+		exit 1
+	fi
+}
 
-if [ "$essid_selected" == "" ]
-	then
-	colecho "Cancelled" $ERR
-	exit 1
-fi
-
-password=$(whiptail --inputbox "Wireless Network Password" 0 0 --title "Enter Password" 3>&1 1>&2 2>&3)
+#return password
+getPassword(){
+password=$(whiptail --backtitle "Wifi Configuration" --inputbox "$essid_selected" 0 0 --title "Enter Password" 3>&1 1>&2 2>&3)
 if [ "$password" == "" ]
 	then
-	colecho "Cancelled" $ERR
+	show-listecho "Configuration incomplete" $ERR
 	exit 1
 fi
+}
 
-messageBox "Replace wpa_supplicant"
-autoBackup /etc/wpa_supplicant/wpa_supplicant.conf
-cat <<\EOF > /etc/wpa_supplicant/wpa_supplicant.conf &&
+saveConfiguration(){
+cat <<EOF > /etc/wpa_supplicant/wpa_supplicant.conf
 ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev
 update_config=1
 network={
-	ssid=SSIDREPLACE
-	psk=PSKREPLACE
+	ssid="$essid_selected"
+	psk="$password"
 }
 EOF
+}
 
-messageBox "Define ESSID"
-replaceLine "/etc/wpa_supplicant/wpa_supplicant.conf" "ssid=SSIDREPLACE" "ssid=\"$essid_selected\"" "network={"
 
-messageBox "Define Password"
-replaceLine "/etc/wpa_supplicant/wpa_supplicant.conf" "psk=PSKREPLACE" "psk=\"$password\"" "ssid="
+# MAIN PROGRAM ############################
+#Verify if you are root
+show-isRoot
+show-description "Setup Wifi"
 
-console
-cat /etc/wpa_supplicant/wpa_supplicant.conf
-console
+scanNetwork
+displayNetwork
+getPassword
+show-listecho "Configuration saved" $OK
+saveConfiguration
 
-messageBox "Connecting to wifi"
-console
-ifdown wlan0
-ifup wlan0
-sleep 5
-iwconfig $interface |grep "Not-Associated"
-wifisetup=$?
-if [ "$wifisetup" != 0 ]
-	then
-	console
-	linebreak
-	nlbecho "Wifi State: connected";minibox_OK
-	linebreak
-	messageBox "Get IP Configuration (DHCP)"
-	ip=$(ip -f inet -o addr show $interface|cut -d\  -f 7 | cut -d/ -f 1)
-	echo $ip
+show-nlbecho " ----->" $INFO
+show-nlbecho "Connecting to $essid_selected" $WARN
+ifdown --force $interface > /dev/null 2>&1
+ifup $interface > /dev/null 2>&1
+sleep 10
+
+isConnected=$(iwconfig $interface 2>/dev/null |grep "Not-Associated"|wc -l)
+if [ $isConnected -eq 0 ];then
+	show-minibox_OK
+	show-listecho "Connected" $OK
 else
-	console
-	nlbecho "Wifi State: not connected";minibox_ERROR
-
+	show-minibox_ERROR
+	show-listecho "Not connected" $ERR
+	iwconfig $interface
 fi
