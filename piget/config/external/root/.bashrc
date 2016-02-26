@@ -38,6 +38,8 @@ echo -ne $NORMAL
 echo "-------------------------"
 echo -e "Display help:$OK /show/help $NORMAL"
 echo -e "Display help for a command:$OK /show/help $ERR command $NORMAL or $ERR command $NORMAL $OK--help $NORMAL"
+echo -e "Setup your Raspberry pi: $OK /pi/setup $NORMAL"
+echo -e "Setup WIFI: $OK /pi/wifi $NORMAL"
 echo "-------------------------"
 
 
